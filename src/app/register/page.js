@@ -3,13 +3,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import AuthCard from "@/components/AuthCard";
 import FormField from "@/components/FormField";
 import SubmitButton from "@/components/SubmitButton";
-import { publicRequest } from "@/lib/auth";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+
+import { publicRequest, saveSession } from "@/lib/auth";
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -17,7 +22,6 @@ export default function RegisterPage() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    // Save the form reference before awaiting the API request.
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
 
@@ -41,10 +45,28 @@ export default function RegisterPage() {
           "Account created successfully. Please check your email to verify your account."
       );
 
-      // Use the saved form reference after the API request.
       formElement.reset();
     } catch (err) {
       setError(err.message || "Registration failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleCredential(credential) {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const data = await publicRequest("/auth/google", {
+        credential,
+      });
+
+      saveSession(data);
+      router.replace("/dashboard");
+    } catch (err) {
+      setError(err.message || "Google registration failed.");
     } finally {
       setLoading(false);
     }
@@ -66,7 +88,7 @@ export default function RegisterPage() {
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-5">
         {error && (
           <p
             role="alert"
@@ -94,32 +116,51 @@ export default function RegisterPage() {
           </div>
         )}
 
-        <FormField
-          label="Full name"
-          name="name"
-          placeholder="Your name"
-          autoComplete="name"
+        <GoogleSignInButton
+          onCredential={handleGoogleCredential}
+          onError={setError}
         />
 
-        <FormField
-          label="Email address"
-          name="email"
-          type="email"
-          placeholder="you@example.com"
-          autoComplete="email"
-        />
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
 
-        <FormField
-          label="Password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-        />
+          <div className="relative flex justify-center">
+            <span className="bg-white px-3 text-sm text-slate-500">
+              Or register with email
+            </span>
+          </div>
+        </div>
 
-        <SubmitButton loading={loading}>
-          Create account
-        </SubmitButton>
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <FormField
+            label="Full name"
+            name="name"
+            placeholder="Your name"
+            autoComplete="name"
+          />
+
+          <FormField
+            label="Email address"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+          />
+
+          <FormField
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+          />
+
+          <SubmitButton loading={loading}>
+            Create account
+          </SubmitButton>
+        </form>
+      </div>
     </AuthCard>
   );
 }
