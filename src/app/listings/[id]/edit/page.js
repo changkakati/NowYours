@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getAccessToken } from "@/lib/auth";
 import { listingsApi } from "@/lib/listings";
 
-export default function EditListingPage() {
+function EditListingForm() {
   const params = useParams();
   const router = useRouter();
   const id = params.id;
@@ -332,5 +332,19 @@ export default function EditListingPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+export default function EditListingPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-gray-50 px-4 py-20 text-center text-gray-500">
+          Loading editor...
+        </main>
+      }
+    >
+      <EditListingForm />
+    </Suspense>
   );
 }

@@ -1,9 +1,8 @@
-
 "use client";
 
 import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { getAccessToken, getStoredUser } from "@/lib/auth";
 import ChatNotifications from "@/components/ChatNotifications";
 
@@ -12,7 +11,7 @@ const navLinks = [
     { label: "My listings", href: "/listings/mine" },
 ];
 
-export default function Header() {
+function HeaderContent() {
     const pathname = usePathname();
     const [menuOpen, setMenuOpen] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
@@ -79,10 +78,11 @@ export default function Header() {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`text-sm transition ${isActive(link.href)
-                                ? "font-semibold text-black"
-                                : "font-medium text-gray-500 hover:text-black"
-                                }`}
+                            className={`text-sm transition ${
+                                isActive(link.href)
+                                    ? "font-semibold text-black"
+                                    : "font-medium text-gray-500 hover:text-black"
+                            }`}
                         >
                             {link.label}
                         </Link>
@@ -94,6 +94,7 @@ export default function Header() {
                     {loggedIn ? (
                         <>
                             <ChatNotifications />
+
                             <Link
                                 href="/wishlist"
                                 className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 hover:text-gray-950"
@@ -113,6 +114,7 @@ export default function Header() {
                                 </svg>
                                 Wishlist
                             </Link>
+
                             <Link
                                 href="/dashboard"
                                 className="max-w-32 truncate px-3 py-2 text-sm font-medium text-gray-600 transition hover:text-black"
@@ -197,10 +199,11 @@ export default function Header() {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`rounded-lg px-3 py-3 text-sm ${isActive(link.href)
-                                    ? "bg-gray-100 font-semibold text-black"
-                                    : "font-medium text-gray-600 hover:bg-gray-50 hover:text-black"
-                                    }`}
+                                className={`rounded-lg px-3 py-3 text-sm ${
+                                    isActive(link.href)
+                                        ? "bg-gray-100 font-semibold text-black"
+                                        : "font-medium text-gray-600 hover:bg-gray-50 hover:text-black"
+                                }`}
                             >
                                 {link.label}
                             </Link>
@@ -243,5 +246,17 @@ export default function Header() {
                 </div>
             )}
         </header>
+    );
+}
+
+export default function Header() {
+    return (
+        <Suspense
+            fallback={
+                <header className="sticky top-0 z-50 h-[72px] border-b border-gray-200/80 bg-white/90" />
+            }
+        >
+            <HeaderContent />
+        </Suspense>
     );
 }

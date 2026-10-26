@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { listingsApi } from "@/lib/listings";
@@ -24,7 +23,7 @@ function formatPrice(listing) {
     }).format(Number(listing.price || 0));
 }
 
-export default function ListingDetailsPage() {
+function ListingDetailsContent() {
     const params = useParams();
     const router = useRouter();
     const id = params.id;
@@ -356,5 +355,19 @@ export default function ListingDetailsPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+export default function ListingDetailsPage() {
+    return (
+        <Suspense
+            fallback={
+                <main className="min-h-screen bg-gray-50 px-4 py-20 text-center text-gray-500">
+                    Loading listing...
+                </main>
+            }
+        >
+            <ListingDetailsContent />
+        </Suspense>
     );
 }
