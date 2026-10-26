@@ -23,7 +23,7 @@ export default function DashboardPage() {
     const accessToken = localStorage.getItem("auth_access_token");
 
     if (!cachedUser && !accessToken) {
-      router.replace("/login");
+      router.replace("/auth/login");
       return;
     }
 
