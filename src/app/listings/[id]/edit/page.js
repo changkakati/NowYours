@@ -6,6 +6,13 @@ import { useParams, useRouter } from "next/navigation";
 import { getAccessToken } from "@/lib/auth";
 import { listingsApi } from "@/lib/listings";
 
+const fieldClass =
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 " +
+  "placeholder:text-slate-400 transition focus:border-slate-900 focus:outline-none " +
+  "focus:ring-1 focus:ring-slate-900 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400";
+
+const labelClass = "mb-1.5 block text-sm font-medium text-slate-700";
+
 function EditListingForm() {
   const params = useParams();
   const router = useRouter();
@@ -19,7 +26,7 @@ function EditListingForm() {
 
   useEffect(() => {
     if (!getAccessToken()) {
-      router.replace("/login");
+      router.replace("/auth/login");
       return;
     }
 
@@ -42,9 +49,7 @@ function EditListingForm() {
         });
 
         setImagesText(
-          (listing.images || [])
-            .map((image) => image.url)
-            .join("\n")
+          (listing.images || []).map((image) => image.url).join("\n")
         );
       } catch (err) {
         setError(err.message || "Could not load listing.");
@@ -97,19 +102,33 @@ function EditListingForm() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 px-4 py-20 text-center text-gray-500">
-        Loading listing...
+      <main className="min-h-screen bg-slate-50">
+        <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
+          <div className="h-4 w-32 animate-pulse rounded bg-slate-200" />
+          <div className="mt-5 rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+            <div className="h-6 w-40 animate-pulse rounded bg-slate-100" />
+            <div className="mt-6 space-y-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-11 animate-pulse rounded-lg bg-slate-100" />
+              ))}
+            </div>
+          </div>
+        </div>
+        <span className="sr-only">Loading editor…</span>
       </main>
     );
   }
 
   if (!form) {
     return (
-      <main className="min-h-screen bg-gray-50 px-4 py-20 text-center">
-        <p role="alert" className="text-red-600">
+      <main className="min-h-screen bg-slate-50 px-4 py-20 text-center">
+        <p role="alert" className="text-sm text-red-600">
           {error || "Listing not found."}
         </p>
-        <Link href="/listings/mine" className="mt-4 inline-block text-indigo-600">
+        <Link
+          href="/listings/mine"
+          className="mt-4 inline-block text-sm font-medium text-slate-900 underline-offset-2 hover:underline"
+        >
           Back to my listings
         </Link>
       </main>
@@ -117,29 +136,35 @@ function EditListingForm() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-10">
-      <div className="mx-auto max-w-3xl">
+    <main className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-10">
         <Link
           href={`/listings/${id}`}
-          className="text-sm font-medium text-indigo-600 hover:underline"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:rounded"
         >
           ← Back to listing
         </Link>
 
-        <section className="mt-5 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
-          <h1 className="text-3xl font-bold text-gray-950">
+        <section className="mt-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-8">
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
             Edit listing
           </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Update the details and save your changes.
+          </p>
 
           {error && (
-            <div role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+            <div
+              role="alert"
+              className="mt-5 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700"
+            >
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="mt-7 space-y-5">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <div>
-              <label htmlFor="title" className="mb-2 block text-sm font-semibold text-gray-700">
+              <label htmlFor="title" className={labelClass}>
                 Title
               </label>
               <input
@@ -150,12 +175,12 @@ function EditListingForm() {
                 maxLength={120}
                 value={form.title}
                 onChange={change}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3"
+                className={fieldClass}
               />
             </div>
 
             <div>
-              <label htmlFor="description" className="mb-2 block text-sm font-semibold text-gray-700">
+              <label htmlFor="description" className={labelClass}>
                 Description
               </label>
               <textarea
@@ -167,13 +192,13 @@ function EditListingForm() {
                 rows={5}
                 value={form.description}
                 onChange={change}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3"
+                className={fieldClass}
               />
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="listing_type" className="mb-2 block text-sm font-semibold text-gray-700">
+                <label htmlFor="listing_type" className={labelClass}>
                   Listing type
                 </label>
                 <select
@@ -181,7 +206,7 @@ function EditListingForm() {
                   name="listing_type"
                   value={form.listing_type}
                   onChange={change}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3"
+                  className={fieldClass}
                 >
                   <option value="sell">For sale</option>
                   <option value="exchange">Exchange</option>
@@ -190,7 +215,7 @@ function EditListingForm() {
               </div>
 
               <div>
-                <label htmlFor="category" className="mb-2 block text-sm font-semibold text-gray-700">
+                <label htmlFor="category" className={labelClass}>
                   Category
                 </label>
                 <input
@@ -199,12 +224,12 @@ function EditListingForm() {
                   required
                   value={form.category}
                   onChange={change}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3"
+                  className={fieldClass}
                 />
               </div>
 
               <div>
-                <label htmlFor="item_condition" className="mb-2 block text-sm font-semibold text-gray-700">
+                <label htmlFor="item_condition" className={labelClass}>
                   Condition
                 </label>
                 <select
@@ -212,7 +237,7 @@ function EditListingForm() {
                   name="item_condition"
                   value={form.item_condition}
                   onChange={change}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3"
+                  className={fieldClass}
                 >
                   <option value="new">New</option>
                   <option value="like_new">Like new</option>
@@ -222,7 +247,7 @@ function EditListingForm() {
               </div>
 
               <div>
-                <label htmlFor="price" className="mb-2 block text-sm font-semibold text-gray-700">
+                <label htmlFor="price" className={labelClass}>
                   Price (₹)
                 </label>
                 <input
@@ -236,14 +261,14 @@ function EditListingForm() {
                   onChange={change}
                   required={form.listing_type === "sell"}
                   placeholder={form.listing_type === "free" ? "Free" : "Price"}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 disabled:bg-gray-100"
+                  className={fieldClass}
                 />
               </div>
             </div>
 
             {form.listing_type === "exchange" && (
               <div>
-                <label htmlFor="desired_exchange" className="mb-2 block text-sm font-semibold text-gray-700">
+                <label htmlFor="desired_exchange" className={labelClass}>
                   Desired exchange
                 </label>
                 <input
@@ -252,14 +277,14 @@ function EditListingForm() {
                   required
                   value={form.desired_exchange}
                   onChange={change}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3"
+                  className={fieldClass}
                 />
               </div>
             )}
 
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="city" className="mb-2 block text-sm font-semibold text-gray-700">
+                <label htmlFor="city" className={labelClass}>
                   City
                 </label>
                 <input
@@ -268,12 +293,12 @@ function EditListingForm() {
                   required
                   value={form.city}
                   onChange={change}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3"
+                  className={fieldClass}
                 />
               </div>
 
               <div>
-                <label htmlFor="area" className="mb-2 block text-sm font-semibold text-gray-700">
+                <label htmlFor="area" className={labelClass}>
                   Area
                 </label>
                 <input
@@ -281,13 +306,13 @@ function EditListingForm() {
                   name="area"
                   value={form.area}
                   onChange={change}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3"
+                  className={fieldClass}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="status" className="mb-2 block text-sm font-semibold text-gray-700">
+              <label htmlFor="status" className={labelClass}>
                 Listing status
               </label>
               <select
@@ -295,7 +320,7 @@ function EditListingForm() {
                 name="status"
                 value={form.status}
                 onChange={change}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3"
+                className={fieldClass}
               >
                 <option value="active">Active</option>
                 <option value="sold">Sold</option>
@@ -305,29 +330,65 @@ function EditListingForm() {
             </div>
 
             <div>
-              <label htmlFor="images" className="mb-2 block text-sm font-semibold text-gray-700">
+              <label htmlFor="images" className={labelClass}>
                 Image URLs
               </label>
               <textarea
                 id="images"
                 rows={4}
                 value={imagesText}
-                onChange={(event) => setImagesText(event.target.value)}
+                onChange={(e) => setImagesText(e.target.value)}
                 placeholder="One public image URL per line"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3"
+                className={`${fieldClass} font-mono text-xs`}
               />
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-1.5 text-xs text-slate-500">
                 Submitting this form replaces the listing's current images.
               </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full rounded-xl bg-indigo-600 px-5 py-3.5 font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
-            >
-              {saving ? "Saving changes..." : "Save changes"}
-            </button>
+            <div className="flex flex-col-reverse gap-2.5 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+              <Link
+                href={`/listings/${id}`}
+                className="rounded-lg border border-slate-200 px-4 py-2.5 text-center text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
+              >
+                Cancel
+              </Link>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2"
+              >
+                {saving ? (
+                  <>
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeOpacity="0.25"
+                        strokeWidth="3"
+                      />
+                      <path
+                        d="M22 12a10 10 0 0 1-10 10"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    Saving…
+                  </>
+                ) : (
+                  "Save changes"
+                )}
+              </button>
+            </div>
           </form>
         </section>
       </div>
@@ -339,8 +400,18 @@ export default function EditListingPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-gray-50 px-4 py-20 text-center text-gray-500">
-          Loading editor...
+        <main className="min-h-screen bg-slate-50">
+          <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
+            <div className="h-4 w-32 animate-pulse rounded bg-slate-200" />
+            <div className="mt-5 rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+              <div className="h-6 w-40 animate-pulse rounded bg-slate-100" />
+              <div className="mt-6 space-y-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-11 animate-pulse rounded-lg bg-slate-100" />
+                ))}
+              </div>
+            </div>
+          </div>
         </main>
       }
     >

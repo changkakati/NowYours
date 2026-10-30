@@ -68,7 +68,7 @@ export default function LoginPage() {
           Don't have an account?{" "}
           <Link
             className="font-semibold text-indigo-600"
-            href="/register"
+            href="/auth/register"
           >
             Create one
           </Link>
@@ -121,7 +121,7 @@ export default function LoginPage() {
               </label>
 
               <Link
-                href="/forgot-password"
+                href="/auth/forgot-password"
                 className="text-sm text-indigo-600"
               >
                 Forgot password?

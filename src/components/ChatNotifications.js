@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -73,7 +72,6 @@ export default function ChatNotifications() {
 
       if (notificationResponse.ok) {
         const data = await notificationResponse.json();
-
         setNotifications(data.notifications || []);
         setUnreadNotifications(Number(data.unreadCount || 0));
       }
@@ -81,7 +79,6 @@ export default function ChatNotifications() {
       if (chatResponse.ok) {
         const data = await chatResponse.json();
         const chats = data.conversations || [];
-
         setUnreadChats(
           chats.reduce(
             (total, chat) => total + Number(chat.unread_count || 0),
@@ -96,12 +93,8 @@ export default function ChatNotifications() {
 
   useEffect(() => {
     if (!token) return;
-
     refreshData(token);
-
-    // Polling keeps badges current even when the socket disconnects.
     const interval = setInterval(() => refreshData(token), 20000);
-
     return () => clearInterval(interval);
   }, [token, refreshData]);
 
@@ -119,7 +112,6 @@ export default function ChatNotifications() {
     socket.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data);
-
         if (
           payload.type === "notification:new" ||
           payload.type === "message:new" ||
@@ -240,16 +232,16 @@ export default function ChatNotifications() {
   if (!token) return null;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       <Link
         href="/chat"
-        className="relative inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 hover:text-gray-950"
+        className="relative inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
         aria-label={`Chats${unreadChats ? `, ${unreadChats} unread` : ""}`}
       >
         <svg
           viewBox="0 0 24 24"
-          width="19"
-          height="19"
+          width="18"
+          height="18"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -259,10 +251,10 @@ export default function ChatNotifications() {
         >
           <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8z" />
         </svg>
-        <span>Chats</span>
+        <span className="hidden sm:inline">Chats</span>
 
         {unreadChats > 0 && (
-          <span className="min-w-5 rounded-full bg-indigo-600 px-1.5 py-0.5 text-center text-[10px] font-bold text-white">
+          <span className="min-w-[18px] rounded-md bg-slate-900 px-1.5 py-0.5 text-center text-[10px] font-semibold leading-none text-white">
             {unreadChats > 99 ? "99+" : unreadChats}
           </span>
         )}
@@ -272,14 +264,14 @@ export default function ChatNotifications() {
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
-          className="relative flex h-10 w-10 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100"
+          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
           aria-label={`Notifications${unreadNotifications ? `, ${unreadNotifications} unread` : ""}`}
           aria-expanded={open}
         >
           <svg
             viewBox="0 0 24 24"
-            width="21"
-            height="21"
+            width="19"
+            height="19"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.8"
@@ -292,20 +284,20 @@ export default function ChatNotifications() {
           </svg>
 
           {unreadNotifications > 0 && (
-            <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-bold text-white">
+            <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-semibold leading-none text-white">
               {unreadNotifications > 99 ? "99+" : unreadNotifications}
             </span>
           )}
         </button>
 
         {open && (
-          <div className="absolute right-0 top-12 z-[100] w-[min(360px,calc(100vw-24px))] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+          <div className="absolute right-0 top-11 z-[100] w-[min(360px,calc(100vw-16px))] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
               <div>
-                <h2 className="font-semibold text-gray-900">
+                <h2 className="text-sm font-semibold text-slate-900">
                   Notifications
                 </h2>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500">
                   {unreadNotifications} unread
                 </p>
               </div>
@@ -314,7 +306,7 @@ export default function ChatNotifications() {
                 type="button"
                 disabled={loading || unreadNotifications === 0}
                 onClick={markAllRead}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-40"
+                className="text-xs font-medium text-slate-900 underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:rounded"
               >
                 Mark all read
               </button>
@@ -323,11 +315,27 @@ export default function ChatNotifications() {
             <div className="max-h-[400px] overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="px-5 py-10 text-center">
-                  <div className="text-2xl">♧</div>
-                  <p className="mt-2 text-sm font-medium text-gray-800">
-                    You're all caught up
+                  <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="text-slate-400"
+                    >
+                      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                      <path d="M10 21h4" />
+                    </svg>
+                  </div>
+                  <p className="mt-3 text-sm font-medium text-slate-900">
+                    You&apos;re all caught up
                   </p>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-slate-500">
                     New message alerts will appear here.
                   </p>
                 </div>
@@ -337,15 +345,15 @@ export default function ChatNotifications() {
                     type="button"
                     key={notification.id}
                     onClick={() => openNotification(notification)}
-                    className={`flex w-full gap-3 border-b border-gray-100 px-4 py-4 text-left transition hover:bg-gray-50 ${
-                      notification.read_at ? "bg-white" : "bg-indigo-50/60"
+                    className={`flex w-full gap-3 border-b border-slate-100 px-4 py-3.5 text-left transition last:border-0 hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50 ${
+                      notification.read_at ? "bg-white" : "bg-slate-50/80"
                     }`}
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
                       <svg
                         viewBox="0 0 24 24"
-                        width="18"
-                        height="18"
+                        width="16"
+                        height="16"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="1.8"
@@ -359,22 +367,22 @@ export default function ChatNotifications() {
 
                     <span className="min-w-0 flex-1">
                       <span className="flex items-start justify-between gap-2">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-sm font-medium text-slate-900">
                           {notification.title}
                         </span>
                         {!notification.read_at && (
-                          <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-600" />
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-900" />
                         )}
                       </span>
 
-                      <span className="mt-1 block break-words text-sm text-gray-600">
+                      <span className="mt-0.5 block break-words text-sm text-slate-600">
                         {notification.actor_name
                           ? `${notification.actor_name}: `
                           : ""}
                         {notification.body}
                       </span>
 
-                      <span className="mt-2 block text-[11px] text-gray-400">
+                      <span className="mt-1.5 block text-[11px] text-slate-400">
                         {formatTime(notification.created_at)}
                       </span>
                     </span>
@@ -383,11 +391,11 @@ export default function ChatNotifications() {
               )}
             </div>
 
-            <div className="border-t border-gray-100 p-3">
+            <div className="border-t border-slate-100 p-2">
               <Link
                 href="/chat"
                 onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100"
+                className="block rounded-lg px-3 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20"
               >
                 Open chats
               </Link>

@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
 import AuthCard from "@/components/AuthCard";
 import FormField from "@/components/FormField";
@@ -15,6 +16,7 @@ function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -24,9 +26,13 @@ function ResetPasswordForm() {
 
     const form = new FormData(event.currentTarget);
     const password = String(form.get("password") || "");
-    const confirmPassword = String(
-      form.get("confirmPassword") || ""
-    );
+    const confirmPassword = String(form.get("confirmPassword") || "");
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -37,45 +43,78 @@ function ResetPasswordForm() {
     const token = params.get("token");
 
     if (!token) {
-      setError("The password reset token is missing.");
+      setError("The password reset link is invalid or missing a token.");
       setLoading(false);
       return;
     }
 
     try {
-      const data = await publicRequest(
-        "/auth/reset-password",
-        { token, password }
-      );
+      const data = await publicRequest("/auth/reset-password", {
+        token,
+        password,
+      });
 
-      setMessage(
-        data.message || "Password updated successfully."
-      );
+      setMessage(data.message || "Your password has been updated.");
+      setDone(true);
 
+      // Give the user a beat to read, then move to login
       window.setTimeout(() => {
-        router.replace("/login");
-      }, 1500);
+        router.replace("/auth/login");
+      }, 2000);
     } catch (err) {
-      setError(err.message || "Unable to reset password.");
+      setError(err.message || "Unable to reset password. The link may have expired.");
     } finally {
       setLoading(false);
     }
   }
 
+  // Success screen — cleaner than redirecting from a form
+  if (done) {
+    return (
+      <AuthCard
+        title="Password updated"
+        subtitle="You can now sign in with your new password."
+        footer={
+          <Link
+            href="/auth/login"
+            className="font-medium text-slate-900 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:rounded"
+          >
+            Go to sign in
+          </Link>
+        }
+      >
+        <div
+          role="status"
+          className="rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800"
+        >
+          {message}
+        </div>
+        <p className="mt-4 text-center text-xs text-slate-400">
+          Redirecting you to sign in…
+        </p>
+      </AuthCard>
+    );
+  }
+
   return (
     <AuthCard
       title="Set a new password"
-      subtitle="Choose a new password for your account."
+      subtitle="Choose a strong password for your account."
+      footer={
+        <Link
+          href="/auth/login"
+          className="font-medium text-slate-900 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:rounded"
+        >
+          Back to sign in
+        </Link>
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {message && (
-          <p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
-            {message}
-          </p>
-        )}
-
         {error && (
-          <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          <p
+            role="alert"
+            className="rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700"
+          >
             {error}
           </p>
         )}
@@ -84,6 +123,7 @@ function ResetPasswordForm() {
           label="New password"
           name="password"
           type="password"
+          placeholder="At least 8 characters"
           autoComplete="new-password"
         />
 
@@ -91,12 +131,11 @@ function ResetPasswordForm() {
           label="Confirm new password"
           name="confirmPassword"
           type="password"
+          placeholder="Re-enter your password"
           autoComplete="new-password"
         />
 
-        <SubmitButton loading={loading}>
-          Reset password
-        </SubmitButton>
+        <SubmitButton loading={loading}>Reset password</SubmitButton>
       </form>
     </AuthCard>
   );
@@ -106,8 +145,17 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <main className="p-10 text-center">
-          Loading...
+        <main className="flex min-h-screen items-center justify-center bg-white px-4">
+          <div
+            aria-hidden="true"
+            className="w-full max-w-sm space-y-4"
+          >
+            <div className="h-8 w-32 animate-pulse rounded bg-slate-100" />
+            <div className="h-6 w-48 animate-pulse rounded bg-slate-100" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-slate-100" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-slate-100" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-slate-100" />
+          </div>
         </main>
       }
     >

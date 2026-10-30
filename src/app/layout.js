@@ -3,8 +3,8 @@ import Header from "@/components/Header";
 import { Suspense } from "react";
 
 export const metadata = {
-    title: "Auth Portal",
-    description: "Simple authentication dashboard",
+    title: "NowYours",
+    description: "Online Marketplace",
 };
 
 export default function RootLayout({ children }) {

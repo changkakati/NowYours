@@ -79,7 +79,7 @@ function VerificationForm() {
         <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
           {error}
           <a
-            href="/login"
+            href="/auth/login"
             className="mt-3 block font-semibold underline"
           >
             Go to login
