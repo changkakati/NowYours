@@ -57,24 +57,24 @@ function ListingDetailsContent() {
 
   async function handleChatWithSeller() {
     if (startingChat) return;
+
+    const token = localStorage.getItem("auth_access_token");
+
+    // Not logged in → redirect to login
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+
+    if (isOwner) {
+      setError("You cannot start a conversation with yourself.");
+      return;
+    }
+
     setStartingChat(true);
     setError("");
 
     try {
-      const token = localStorage.getItem("auth_access_token");
-
-      if (!token) {
-        setError(
-          "Your login session could not be found. Please check your authentication session."
-        );
-        return;
-      }
-
-      if (isOwner) {
-        setError("You cannot start a conversation with yourself.");
-        return;
-      }
-
       const API_URL = (
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"
       ).replace(/\/$/, "");
